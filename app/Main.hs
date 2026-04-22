@@ -39,6 +39,15 @@ calcDano nivel = base + (nivel * bonus)
    base = 5
    bonus = 3
 
+-- rotaciona a string colocando o primeiro carac na ultima posição e o resto no começo
+rotacionar :: String -> String
+rotacionar []     = []
+rotacionar (x:xs) = xs ++ [x]
+
+-- apenas rotaciona a string de atk Pattern do inimigo
+avancarTurnoInimigo :: Inimigo -> Inimigo
+avancarTurnoInimigo enemy = enemy {atkpattern = rotacionar (atkpattern enemy)}
+
 
 aplicarAcao :: GameState -> Acao -> GameState
 aplicarAcao state Fugir = state {inimigo = Nothing, salaatual = salaatual state + 1}
@@ -58,6 +67,8 @@ aplicarAcao state Explorar = state
 aplicarAcao state (UsarItem _) = state
 
 -- p1 = Player {nome = "fulano", xp = 20, itens = [Potion, Shield]}
--- i1 = Inimigo {hp = 50, ataque = 2, bloqueio = 3, atkpattern = "012"}
+-- i1 = Inimigo {hp = 50, ataque = 2, bloqueio = 3, atkpattern = "ABA"}
 -- g1 = GameState {jogador = p1, inimigo = Nothing, andaratual = 1, salaatual = 1}
 -- g2 = GameState {jogador = p1, inimigo = Just i1, andaratual = 1, salaatual = 1}
+
+-- atk pattern do inimigo ex : "AAB" cada caractere é uma ação, A = ataca, B = defende e aumenta seu dano ex:(+1 de dano de ataque)
