@@ -8,6 +8,7 @@ data Item = Potion | Shield deriving (Show)
 
 data Player = Player
   { nome  :: String
+  , health :: Int
   , xp    :: Int
   , itens :: [Item]
   } deriving (Show)
@@ -15,7 +16,7 @@ data Player = Player
 data Inimigo = Inimigo
   { hp :: Int
   , ataque :: Int
-  , bloqueio :: Int
+  , bloqueio :: Int -- deprecated, nao implementado, ainda, pois aumentaria a complexidade, a ver
   , atkpattern :: String
   } deriving (Show)
 
@@ -48,6 +49,18 @@ rotacionar (x:xs) = xs ++ [x]
 avancarTurnoInimigo :: Inimigo -> Inimigo
 avancarTurnoInimigo enemy = enemy {atkpattern = rotacionar (atkpattern enemy)}
 
+resolverTurno :: GameState -> GameState
+resolverTurno state = case inimigo state of
+    Nothing -> state
+    Just enemy ->
+      let acao = head (atkpattern enemy)
+          healthAtacado = health (jogador state) - ataque enemy
+          buffDano = 1
+      in if acao == 'A'
+          -- é um ataque, inimigo ataca o jogador, rotaciona o pattern
+          then state { jogador = (jogador state) {health = healthAtacado}, inimigo = Just enemy {atkpattern = rotacionar (atkpattern enemy) }}
+          -- não é ataque, então buffa o dano e rotaciona o pattern
+          else state { inimigo = Just enemy {ataque = ataque enemy + buffDano, atkpattern = rotacionar (atkpattern enemy)}}
 
 aplicarAcao :: GameState -> Acao -> GameState
 aplicarAcao state Fugir = state {inimigo = Nothing, salaatual = salaatual state + 1}
@@ -66,7 +79,7 @@ aplicarAcao state Defender = state
 aplicarAcao state Explorar = state
 aplicarAcao state (UsarItem _) = state
 
--- p1 = Player {nome = "fulano", xp = 20, itens = [Potion, Shield]}
+-- p1 = Player {nome = "fulano", health = 30, xp = 20, itens = [Potion, Shield]}
 -- i1 = Inimigo {hp = 50, ataque = 2, bloqueio = 3, atkpattern = "ABA"}
 -- g1 = GameState {jogador = p1, inimigo = Nothing, andaratual = 1, salaatual = 1}
 -- g2 = GameState {jogador = p1, inimigo = Just i1, andaratual = 1, salaatual = 1}
