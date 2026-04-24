@@ -4,7 +4,14 @@ main :: IO ()
 main = do
   putStrLn "Hello, Haskell!"
 
-data Item = Potion | Shield deriving (Show)
+-- ############ SECAO DE DADOS ##############
+
+data Efeito = Curar Int | FugaGarantida deriving (Show)
+
+data Item = Item
+  { nomeItem :: String
+  , efeito :: Efeito
+  } deriving (Show)
 
 data Player = Player
   { nome  :: String
@@ -16,7 +23,7 @@ data Player = Player
 data Inimigo = Inimigo
   { hp :: Int
   , ataque :: Int
-  , bloqueio :: Int -- deprecated, nao implementado, ainda, pois aumentaria a complexidade, a ver
+  , bloqueio :: Int -- TODO: deprecated, nao implementado, ainda, pois aumentaria a complexidade, a ver
   , atkpattern :: String
   } deriving (Show)
 
@@ -28,6 +35,22 @@ data GameState = GameState
   } deriving (Show)
 
 data Acao = Explorar | Atacar | Defender | Fugir | UsarItem Item deriving(Show)
+
+-- Itens concretos
+
+pocao :: Item
+pocao = Item {nomeItem = "Pocao", efeito = (Curar 20)}
+
+escapeScroll :: Item
+escapeScroll = Item {nomeItem = "escapeScroll", efeito = FugaGarantida}
+
+-- ############### SECAO DE FUNÇÕES PURAS ###################
+
+aplicarEfeito :: Efeito -> Player -> Player
+aplicarEfeito (Curar qtd) player = player {health = (health player) + qtd}
+aplicarEfeito FugaGarantida player = player
+
+
 
 -- calcula nivel pelo xp, 10 xp = 1 lvl
 calcNivel :: Int -> Int
@@ -63,7 +86,7 @@ resolverTurno state = case inimigo state of
           else state { inimigo = Just enemy {ataque = ataque enemy + buffDano, atkpattern = rotacionar (atkpattern enemy)}}
 
 aplicarAcao :: GameState -> Acao -> GameState
-aplicarAcao state Fugir = state {inimigo = Nothing, salaatual = salaatual state + 1}
+aplicarAcao state Fugir = state {inimigo = Nothing, salaatual = salaatual state + 1} -- TODO: falta um rand pra ver se vai conseguir escapar ainda
 aplicarAcao state Atacar = case inimigo state of
   Nothing  -> state
   Just ini ->
@@ -77,11 +100,19 @@ aplicarAcao state Atacar = case inimigo state of
 
 aplicarAcao state Defender = state
 aplicarAcao state Explorar = state
-aplicarAcao state (UsarItem _) = state
+aplicarAcao state (UsarItem item) = case efeito item of
+  Curar qtd ->
+    let p          = (jogador state)
+        novoHealth = health p + qtd
+        novosItens = filter (\i -> nomeItem i /= nomeItem item) (itens p)
+        novoPlayer = p { health = novoHealth, itens = novosItens }
+    in state { jogador = novoPlayer }
+  FugaGarantida -> state {inimigo = Nothing, salaatual = (salaatual state) + 1}
 
--- p1 = Player {nome = "fulano", health = 30, xp = 20, itens = [Potion, Shield]}
+
+-- p1 = Player {nome = "fulano", health = 30, xp = 20, itens = [pocao, escapeScroll]}
 -- i1 = Inimigo {hp = 50, ataque = 2, bloqueio = 3, atkpattern = "ABA"}
 -- g1 = GameState {jogador = p1, inimigo = Nothing, andaratual = 1, salaatual = 1}
 -- g2 = GameState {jogador = p1, inimigo = Just i1, andaratual = 1, salaatual = 1}
 
--- atk pattern do inimigo ex : "AAB" cada caractere é uma ação, A = ataca, B = defende e aumenta seu dano ex:(+1 de dano de ataque)
+-- atk pattern do inimigo exemplo : "AAB" cada caractere é uma ação, A = ataca, B = defende e aumenta seu dano ex:(+1 de dano de ataque)
