@@ -34,7 +34,7 @@ data GameState = GameState
   , salaatual :: Int
   } deriving (Show)
 
-data Acao = Explorar | Atacar | Defender | Fugir | UsarItem Item deriving(Show)
+data Acao = Explorar Int Int | Atacar | Defender | Fugir Int | UsarItem Item deriving(Show)
 
 -- Itens concretos
 
@@ -49,8 +49,6 @@ escapeScroll = Item {nomeItem = "escapeScroll", efeito = FugaGarantida}
 aplicarEfeito :: Efeito -> Player -> Player
 aplicarEfeito (Curar qtd) player = player {health = (health player) + qtd}
 aplicarEfeito FugaGarantida player = player
-
-
 
 -- calcula nivel pelo xp, 10 xp = 1 lvl
 calcNivel :: Int -> Int
@@ -68,9 +66,31 @@ rotacionar :: String -> String
 rotacionar []     = []
 rotacionar (x:xs) = xs ++ [x]
 
+gerarInimigo :: Int -> Inimigo
+gerarInimigo andar = Inimigo
+  { hp         = 10 + (andar * 5)
+  , ataque     = 2  + (andar * 1)
+  , bloqueio   = 0 -- a ver isso aq
+  , atkpattern = "AAB"
+  }
+
 -- apenas rotaciona a string de atk Pattern do inimigo
 avancarTurnoInimigo :: Inimigo -> Inimigo
 avancarTurnoInimigo enemy = enemy {atkpattern = rotacionar (atkpattern enemy)}
+
+adicionarItem :: Item -> [Item] -> [Item]
+adicionarItem item itens =
+  let numItens = length itens
+      slotsItem = 3
+  in if numItens < slotsItem
+        then item : itens -- adicionamos no comeco da lista
+        else itens -- nao mexe pois esta cheio
+
+gerarItem :: Int -> Item
+gerarItem num = case num of
+  1 -> pocao
+  _ -> escapeScroll
+
 
 resolverTurno :: GameState -> GameState
 resolverTurno state = case inimigo state of
@@ -85,8 +105,15 @@ resolverTurno state = case inimigo state of
           -- não é ataque, então buffa o dano e rotaciona o pattern
           else state { inimigo = Just enemy {ataque = ataque enemy + buffDano, atkpattern = rotacionar (atkpattern enemy)}}
 
+avancarSala :: GameState -> GameState
+avancarSala state
+  | (salaatual state) >= 5 = state {salaatual = 1, andaratual = (andaratual state) + 1}
+  | otherwise = state {salaatual = (salaatual state) + 1}
+
 aplicarAcao :: GameState -> Acao -> GameState
-aplicarAcao state Fugir = state {inimigo = Nothing, salaatual = salaatual state + 1} -- TODO: falta um rand pra ver se vai conseguir escapar ainda
+aplicarAcao state (Fugir fugirChance) = case fugirChance of
+  0 -> state -- nao escapou, tirou 0
+  _ -> (avancarSala state) {inimigo = Nothing} -- escapou, tirou 1
 aplicarAcao state Atacar = case inimigo state of
   Nothing  -> state
   Just ini ->
@@ -98,18 +125,29 @@ aplicarAcao state Atacar = case inimigo state of
          else state { inimigo = Just ini { hp = novoHp } }
 
 
-aplicarAcao state Defender = state
-aplicarAcao state Explorar = state
+aplicarAcao state Defender = state -- deprecated, TODO: pra funcionar deve ter um turn manager que permite acao de player e inimigo, e ele tira a defesa no comeco do turno
+aplicarAcao state (Explorar roomNum itemRoll) =
+  let novoState = avancarSala state -- avancamos a sala e agora decidimos oq tera nela, com base no rng q o scotty gera
+      curaFogueira = (Curar 20)
+      p = (jogador novoState)
+  in case roomNum of
+    0 -> novoState -- sala vazia
+    1 -> novoState {inimigo = Just (gerarInimigo (andaratual novoState))} -- inimigo
+    2 -> novoState {jogador = aplicarEfeito curaFogueira p} -- fogueira, cura o jogador
+    _ -> novoState {jogador = p {itens = adicionarItem (gerarItem itemRoll) (itens p)}} -- adicionamos um item pro jogador, se tiver espaco
 aplicarAcao state (UsarItem item) = case efeito item of
-  Curar qtd ->
-    let p          = (jogador state)
-        novoHealth = health p + qtd
-        novosItens = filter (\i -> nomeItem i /= nomeItem item) (itens p)
-        novoPlayer = p { health = novoHealth, itens = novosItens }
-    in state { jogador = novoPlayer }
-  FugaGarantida -> state {inimigo = Nothing, salaatual = (salaatual state) + 1}
+  FugaGarantida -> (avancarSala state) {inimigo = Nothing}
+  _ ->
+    let p = jogador state
+        playerCurado = aplicarEfeito (efeito item) p
+        novosItens = filter (\i -> nomeItem i /= nomeItem item) (itens playerCurado)
+    in state { jogador = playerCurado { itens = novosItens } }
 
 
+-- RNGS, serao gerados pelo scotty:
+-- itemRoll, um num de 1 a 2
+-- roomNum, um num de 0 a 4
+-- fugirChance, um num de 0 a 1
 -- p1 = Player {nome = "fulano", health = 30, xp = 20, itens = [pocao, escapeScroll]}
 -- i1 = Inimigo {hp = 50, ataque = 2, bloqueio = 3, atkpattern = "ABA"}
 -- g1 = GameState {jogador = p1, inimigo = Nothing, andaratual = 1, salaatual = 1}
