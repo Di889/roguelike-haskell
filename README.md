@@ -54,7 +54,7 @@ Se o desenvolvimento não conseguir atingir todos os objetivos e requisitos, ess
 
 AQUI COMEÇA, adicionar mais coisa conforme surge e depois uma olhada geral pra ver se nao faltou nada:
 
--> ideia inicial TODO:
+-> Sobre a ideia inicial : TODO, NO FIM DO PROJETO
 
 ->Modelagem do estado com Maybe inimigo
 Durante a modelagem inicial do estado do jogo e da lógica principal, esbarrei em um problema que era sobre como representar um inimigo, já que desde a ideia principal era poder ter salas com e sem inimigos, ou seja, o jogador nem sempre tem uma ameaça direta, pra não complicar mais ainda a lógica e, por exemplo, ter que representar quando o jogador esta em combate ou não, ao pesquisar formas de implementar com recursos do haskell, encontrei o tipo `Maybe` que preenche essa lacuna com as duas possibilidades, não tendo com Nothing e tendo com Just inimigo
@@ -74,7 +74,7 @@ Após uma reflexão, com a ajuda do Claude, percebi que o `where` está associad
 Isso contribui pra um maior entendimento da linguagem Haskell como um todo e distinções e esclarecimentos entre conceitos importantes presentes em outras linguagens.
 
 -> Campos duplicados em `Inimigo` e `Player`
-TODO:
+No meio do desenvolvimento, acabei me deparando com um problema pois em teoria ambos o player e o inimigo desejam ter uma variavel vida em seus estados, acabei encarando as seções de data como objetos são retratados em outras linguagens e pensei nao haver problema em repetir nomes se em diferentes datas, o que me gerou um problema de compilação, com pesquisa percebi que o Haskell trata como funções e então duas funções nao podem ter o mesmo nome, resolvi isso de uma forma preguiçosa com um tendo "hp" e outro "health".
 
 
 
