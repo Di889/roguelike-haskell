@@ -51,23 +51,23 @@ gerarItem num = case num of
 -- resolve o turno do inimigo
 -- a defesa do jogador é aplicada no dano e depois sempre reseta
 resolverTurno :: GameState -> GameState
-resolverTurno state =
-  let playerSemDefesa = (jogador state) { defesa = 0 }  -- reseta sempre
-  in case inimigo state of
-    Nothing -> state { jogador = playerSemDefesa }
+resolverTurno gs =
+  let playerSemDefesa = (jogador gs) { defesa = 0 }  -- reseta sempre
+  in case inimigo gs of
+    Nothing -> gs { jogador = playerSemDefesa }
     Just enemy ->
-      let acao        = head (atkpattern enemy)
-          danoFinal   = max 0 (ataque enemy - defesa (jogador state))
-          novoHealth  = health (jogador state) - danoFinal
+      let acaoInimigo = head (atkpattern enemy)
+          danoFinal   = max 0 (ataque enemy - defesa (jogador gs))
+          novoHealth  = health (jogador gs) - danoFinal
           buffDano    = 1
-      in if acao == 'A'
+      in if acaoInimigo == 'A'
           -- inimigo ataca: aplica dano mitigado pela defesa e depois reseta defesa
-          then state
+          then gs
                 { jogador = playerSemDefesa { health = novoHealth }
                 , inimigo = Just enemy { atkpattern = rotacionar (atkpattern enemy) }
                 }
           -- inimigo buffa: so rotaciona o pattern e reseta defesa do jogador
-          else state
+          else gs
                 { jogador = playerSemDefesa
                 , inimigo = Just enemy
                     { ataque     = ataque enemy + buffDano
@@ -76,26 +76,26 @@ resolverTurno state =
                 }
 
 avancarSala :: GameState -> GameState
-avancarSala state
-  | (salaatual state) >= 5 = state {salaatual = 1, andaratual = (andaratual state) + 1}
-  | otherwise = state {salaatual = (salaatual state) + 1}
+avancarSala gs
+  | (salaatual gs) >= 5 = gs {salaatual = 1, andaratual = (andaratual gs) + 1}
+  | otherwise = gs {salaatual = (salaatual gs) + 1}
 
 aplicarAcao :: GameState -> Acao -> GameState
-aplicarAcao state (Fugir fugirChance) = case fugirChance of
-  0 -> state
-  _ -> (avancarSala state) {inimigo = Nothing}
-aplicarAcao state Atacar = case inimigo state of
-  Nothing  -> state
+aplicarAcao gs (Fugir fugirChance) = case fugirChance of
+  0 -> gs
+  _ -> (avancarSala gs) {inimigo = Nothing}
+aplicarAcao gs Atacar = case inimigo gs of
+  Nothing  -> gs
   Just ini ->
-    let dano         = calcDano (calcNivel (xp (jogador state)))
+    let dano         = calcDano (calcNivel (xp (jogador gs)))
         novoHp       = hp ini - dano
-        jogadorComXp = (jogador state) { xp = xp (jogador state) + 10 }
+        jogadorComXp = (jogador gs) { xp = xp (jogador gs) + 10 }
     in if novoHp <= 0
-         then state { inimigo = Nothing, jogador = jogadorComXp }
-         else state { inimigo = Just ini { hp = novoHp } }
-aplicarAcao state Defender = state { jogador = (jogador state) { defesa = 5 } }
-aplicarAcao state (Explorar roomNum itemRoll) =
-  let novoState     = avancarSala state
+         then gs { inimigo = Nothing, jogador = jogadorComXp }
+         else gs { inimigo = Just ini { hp = novoHp } }
+aplicarAcao gs Defender = gs { jogador = (jogador gs) { defesa = 5 } }
+aplicarAcao gs (Explorar roomNum itemRoll) =
+  let novoState     = avancarSala gs
       curaFogueira  = Curar 20
       p             = jogador novoState
   in case roomNum of
@@ -103,13 +103,13 @@ aplicarAcao state (Explorar roomNum itemRoll) =
     1 -> novoState { inimigo = Just (gerarInimigo (andaratual novoState)) }
     2 -> novoState { jogador = aplicarEfeito curaFogueira p }
     _ -> novoState { jogador = p { itens = adicionarItem (gerarItem itemRoll) (itens p) } }
-aplicarAcao state (UsarItem item) = case efeito item of
-  FugaGarantida -> (avancarSala state) {inimigo = Nothing}
+aplicarAcao gs (UsarItem item) = case efeito item of
+  FugaGarantida -> (avancarSala gs) {inimigo = Nothing}
   _ ->
-    let p           = jogador state
+    let p           = jogador gs
         playerCurado = aplicarEfeito (efeito item) p
         novosItens  = filter (\i -> nomeItem i /= nomeItem item) (itens playerCurado)
-    in state { jogador = playerCurado { itens = novosItens } }
+    in gs { jogador = playerCurado { itens = novosItens } }
 
 novaPartida :: String -> GameState
 novaPartida nomeJogador =

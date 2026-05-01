@@ -7,7 +7,6 @@ import Game.Logic
 
 import Web.Scotty
 import System.Random (randomRIO)
-import Control.Monad.IO.Class (liftIO)
 
 main :: IO ()
 main = scotty 3000 $ do
@@ -15,8 +14,8 @@ main = scotty 3000 $ do
   -- cria uma nova partida e retorna o gamestate zeradinho
   -- POST /nova-partida/:nome
   post "/nova-partida/:nome" $ do
-    nome <- pathParam "nome"
-    json (novaPartida nome)
+    nomeReq <- pathParam "nome"
+    json (novaPartida nomeReq)
 
   -- recebe o gamestate + acao do cliente, aplica a acao, resolve o turno do inimigo e então retorna o novo gamestate
   -- POST /acao
