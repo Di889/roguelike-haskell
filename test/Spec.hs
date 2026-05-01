@@ -4,20 +4,17 @@ import Test.HUnit
 import Game.Types
 import Game.Logic
 
--- 1. calculo de dano
 testCalcDano :: Test
 testCalcDano = TestCase $ do
     assertEqual "Dano no nivel 0 (base 5 + 0*3)" 5 (calcDano 0)
     assertEqual "Dano no nivel 2 (base 5 + 2*3)" 11 (calcDano 2)
 
--- 2. efeito de cura
 testAplicarCura :: Test
 testAplicarCura = TestCase $ do
     let player = Player { nome = "teste", health = 10, xp = 0, itens = [], defesa = 0 }
     let playerCurado = aplicarEfeito (Curar 20) player
     assertEqual "O jogador deve ficar com 30 de vida" 30 (health playerCurado)
 
--- 3. Testando o avanço de sala
 testAvancarSala :: Test
 testAvancarSala = TestCase $ do
     let player = Player "Teste" 30 0 [] 0

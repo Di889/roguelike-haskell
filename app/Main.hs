@@ -4,30 +4,49 @@ module Main where
 
 import Game.Types
 import Game.Logic
+import Game.Database
 
 import Web.Scotty
 import System.Random (randomRIO)
 
 main :: IO ()
-main = scotty 3000 $ do
+main = do
+  -- iniciamos o db antes de subir o server web
+  initDB
 
-  -- cria uma nova partida e retorna o gamestate zeradinho
-  -- POST /nova-partida/:nome
-  post "/nova-partida/:nome" $ do
-    nomeReq <- pathParam "nome"
-    json (novaPartida nomeReq)
+  scotty 3000 $ do
 
-  -- recebe o gamestate + acao do cliente, aplica a acao, resolve o turno do inimigo e então retorna o novo gamestate
-  -- POST /acao
-  -- Body (JSON): { "gameState": <GameState>, "acaoCliente": <AcaoCliente> }
-  post "/acao" $ do
-    req <- jsonData :: ActionM AcaoClienteRequest
-    let gs = gameState req
-    novoEstado <- liftIO $ processarAcao gs (acaoCliente req)
-    json novoEstado
+    -- rotas do frontend
+    get "/" $ file "public/index.html"
+    get "/style.css" $ file "public/style.css"
+    get "/app.js" $ file "public/app.js"
 
-  -- pra teste
-  get "/" $ text "api - ok"
+    -- GET /leaderboard
+    get "/leaderboard" $ do
+      pontuacoes <- liftIO getLeaderboard
+      json pontuacoes
+
+    -- cria uma nova partida e retorna o gamestate zeradinho
+    -- POST /nova-partida/:nome
+    post "/nova-partida/:nome" $ do
+      nomeReq <- pathParam "nome"
+      json (novaPartida nomeReq)
+
+    -- recebe o gamestate + acao do cliente, aplica a acao, resolve o turno do inimigo e então retorna o novo gamestate
+    -- POST /acao
+    -- Body (JSON): { "gameState": <GameState>, "acaoCliente": <AcaoCliente> }
+    post "/acao" $ do
+      req <- jsonData :: ActionM AcaoClienteRequest
+      let gs = gameState req
+      novoEstado <- liftIO $ processarAcao gs (acaoCliente req)
+
+      -- checamos se o jogador morreu pra salvar no db
+      let p = jogador novoEstado
+      if (health p) <= 0
+        then liftIO $ salvarScore (nome p) (andaratual novoEstado)
+        else return ()
+
+      json novoEstado
 
 
 -- converte AcaoCliente p/ Acao e gera os RNGs necessarios

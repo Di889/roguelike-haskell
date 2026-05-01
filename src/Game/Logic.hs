@@ -117,7 +117,7 @@ novaPartida nomeJogador =
     { jogador = Player
         { nome   = nomeJogador
         , health = 30
-        , xp     = 0
+        , xp     = 10
         , itens  = []
         , defesa = 0
         }
@@ -128,7 +128,7 @@ novaPartida nomeJogador =
 
 -- RNGS, serao gerados pelo scotty:
 -- itemRoll, um num de 1 a 2
--- roomNum, um num de 0 a 4
+-- roomNum, um num de 0 a 3
 -- fugirChance, um num de 0 a 1
 -- p1 = Player {nome = "fulano", health = 30, xp = 20, itens = [pocao, escapeScroll]}
 -- i1 = Inimigo {hp = 50, ataque = 2, bloqueio = 3, atkpattern = "ABA"}
