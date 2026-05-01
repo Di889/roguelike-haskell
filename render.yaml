@@ -1,0 +1,17 @@
+services:
+  - name: demo-scotty-codespace-2026a
+    type: web
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    buildFilter:
+      paths:
+        - Dockerfile
+        - render.yaml
+        - src/**
+      ignoredPaths:
+        - README.md
+        - assets/**    

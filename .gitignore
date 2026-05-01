@@ -1,5 +1,51 @@
+# Haskell build artifacts
+dist/
 dist-newstyle/
-.ghc.environment*
 *.hi
 *.o
+*.dyn_o
+*.dyn_hi
+
+# Stack
+.stack-work/
+.stack-work-*/
+.stack-work-dist-*/
+.stack/
+
+# Cabal
+cabal.project.local
+cabal.project.local.*
+cabal.sandbox.config
+cabal.config
+*.cabal-sandbox/
+*.cabal-sandbox/*
+
+# GHC environment
+.ghc.environment.*
+.ghci
+.ghc.*
+
+# Binary outputs
+*.exe
+*.out
+*.so
+*.dylib
+*.a
+*.hi
+*.o
+
+# Logs
+*.log
+
+# Editors / IDEs
+*.swp
+*~
+.vscode/
 .idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+
+# Intellij
