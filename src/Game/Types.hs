@@ -16,6 +16,7 @@ data Item = Item
 data Player = Player
   { nome  :: String
   , health :: Int
+  , maxHealth :: Int
   , xp    :: Int
   , itens :: [Item]
   , defesa :: Int

@@ -56,7 +56,8 @@ processarAcao gs ExplorarC = do
   roomNum  <- randomRIO (0, 3) :: IO Int  -- 0=vazio 1=inimigo 2=fogueira 3=item
   itemRoll <- randomRIO (1, 2) :: IO Int  -- 1=pocao 2=escapeScroll
   let estadoAposAcao = aplicarAcao gs (Explorar roomNum itemRoll)
-  return $ resolverTurno estadoAposAcao
+  -- removido o resolver turno pro inimigo nao atacar sem o player fazer sua acao
+  return estadoAposAcao
 
 processarAcao gs AtacarC = do
   let estadoAposAcao = aplicarAcao gs Atacar

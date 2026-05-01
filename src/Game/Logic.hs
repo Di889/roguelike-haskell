@@ -9,7 +9,7 @@ escapeScroll :: Item
 escapeScroll = Item {nomeItem = "escapeScroll", efeito = FugaGarantida}
 
 aplicarEfeito :: Efeito -> Player -> Player
-aplicarEfeito (Curar qtd) player = player {health = (health player) + qtd}
+aplicarEfeito (Curar qtd) player = player { health = min (maxHealth player) (health player + qtd) }
 aplicarEfeito FugaGarantida player = player
 
 calcNivel :: Int -> Int
@@ -95,14 +95,17 @@ aplicarAcao gs Atacar = case inimigo gs of
          else gs { inimigo = Just ini { hp = novoHp } }
 aplicarAcao gs Defender = gs { jogador = (jogador gs) { defesa = 5 } }
 aplicarAcao gs (Explorar roomNum itemRoll) =
-  let novoState     = avancarSala gs
-      curaFogueira  = Curar 20
-      p             = jogador novoState
-  in case roomNum of
-    0 -> novoState
-    1 -> novoState { inimigo = Just (gerarInimigo (andaratual novoState)) }
-    2 -> novoState { jogador = aplicarEfeito curaFogueira p }
-    _ -> novoState { jogador = p { itens = adicionarItem (gerarItem itemRoll) (itens p) } }
+  case inimigo gs of
+    Just _  -> gs
+    Nothing ->
+      let novoState     = avancarSala gs
+          curaFogueira  = Curar 20
+          p             = jogador novoState
+      in case roomNum of
+        0 -> novoState
+        1 -> novoState { inimigo = Just (gerarInimigo (andaratual novoState)) }
+        2 -> novoState { jogador = aplicarEfeito curaFogueira p }
+        _ -> novoState { jogador = p { itens = adicionarItem (gerarItem itemRoll) (itens p) } }
 aplicarAcao gs (UsarItem item) = case efeito item of
   FugaGarantida -> (avancarSala gs) {inimigo = Nothing}
   _ ->
@@ -116,7 +119,8 @@ novaPartida nomeJogador =
   GameState
     { jogador = Player
         { nome   = nomeJogador
-        , health = 30
+        , health = 80
+        , maxHealth = 100
         , xp     = 10
         , itens  = []
         , defesa = 0
