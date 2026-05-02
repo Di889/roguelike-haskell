@@ -18,8 +18,14 @@ main = do
 
     -- rotas do frontend
     get "/" $ file "public/index.html"
-    get "/style.css" $ file "public/style.css"
-    get "/app.js" $ file "public/app.js"
+
+    get "/style.css" $ do
+      setHeader "Content-Type" "text/css"
+      file "public/style.css"
+
+    get "/app.js" $ do
+      setHeader "Content-Type" "application/javascript"
+      file "public/app.js"
 
     -- GET /leaderboard
     get "/leaderboard" $ do

@@ -81,8 +81,9 @@ Se os passos foram seguidos corretamente, o servidor estará rodando e para aces
 
 ## 6. Deploy
 
-Link do serviço publicado: <complete aqui>
+Link do serviço publicado: https://perso-2026a-di889.onrender.com
 
+O Deploy foi tranquilo e nada fora do esperado, utilizei os slides da professora com o passo e passo.
 
 ---
 
