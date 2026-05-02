@@ -24,39 +24,36 @@ Por fim, como proposto e aconselhado pela professora, o trabalho é versionado s
 
 ## 3. Processo de desenvolvimento
 
-- **Sobre a ideia inicial**
+**Sobre a ideia inicial**:
 a ideia principal basicamente se concretizou, o projeto está como eu o imaginei, confesso que pensei que fosse mais facil e ate cogitei coisas que dariam scope creep como equipamentos diversificados e inimigos mais diversos, talvez uma progressão melhor. Porém, ainda assim fiquei satisfeito com o resultado
 
--**Modelagem do estado com Maybe inimigo**
+**Modelagem do estado com Maybe inimigo**:
 Durante a modelagem inicial do estado do jogo e da lógica principal, esbarrei em um problema que era sobre como representar um inimigo, já que desde a ideia principal era poder ter salas com e sem inimigos, ou seja, o jogador nem sempre tem uma ameaça direta.
-
 Após pesquisar formas de implementar o requerido com recursos do haskell, encontrei o tipo `Maybe` que preenche essa lacuna com as duas possibilidades, não tendo com "Nothing" e tendo com "Just inimigo".
 
-- **Seperação do RNG da lógica pura**
-uma decisão que tomei foi não incluir geração de valores aleatórios juntamente da lógica principal e das funções principais do jogo. Em vez disso, esses valores são recebidos como parametros pelas funções, onde será responsabilidade de uma camada externa(Scotty) de gerar esses valores.
-- 
+**Seperação do RNG da lógica pura**:
+uma decisão que tomei foi não incluir a geração de valores aleatórios juntamente da lógica principal e das funções principais do jogo. Em vez disso, esses valores são recebidos como parametros pelas funções, onde será responsabilidade de uma camada externa(Scotty) de gerar esses valores.
 Essa abordagem mantém as funções puras e determínisticas, o que facilita testes, debugging e melhora a compreensão do comportamento do sistema.
 
-- **Dificuldade com where em expressões case**
+**Dificuldade com where em expressões case**:
 Durante a implementação, acabei por usar `where` dentro de uma expressão `case`, o que resultou em erro de compilação.
-- 
 Após pesquisas e uma sessão de tira-duvidas com a ajuda do Claude, percebi que o `where` está associado com definições de equações e funções e, portanto, não pode ser usado diretamente com `case`. Pra resolver isso, utilizei a estrutura `let` e `in`, que permite definir variaveis locais dentro de expressões.
-
 Isso contribuiu pra um maior entendimento da linguagem Haskell como um todo pra mim e distinções e esclarecimentos entre conceitos importantes presentes em outras linguagens.
 
-- **Campos duplicados em `Inimigo` e `Player`**
+**Campos duplicados em `Inimigo` e `Player`**:
 No meio do desenvolvimento, acabei me deparando com um problema pois em teoria ambos o player e o inimigo desejam ter uma variavel vida em seus estados, acabei encarando as seções de data como objetos são retratados em outras linguagens e pensei nao haver problema em repetir nomes se em diferentes datas, o que me gerou um problema de compilação, com pesquisa percebi que o Haskell trata como funções e então duas funções nao podem ter o mesmo nome, resolvi isso de uma forma preguiçosa com um tendo "hp" e outro "health".
 
-- **Sobre o Scotty e a execução do servidor web**
-Inicialmente, tentei executar o projeto usando o cabal no windows(win 10). Porém, enfrentei um monte de dificuldades pois não funcionava de jeito nenhum, tentei desativar antivirus, pesquisar problemas, desativar firewall, criar um novo projeto cabal, entre outras alternativas. 
+**Sobre o Scotty e a execução do servidor web**:
+Inicialmente, tentei executar o projeto usando o cabal no windows(win 10). Porém, enfrentei um monte de dificuldades pois não funcionava de jeito nenhum, tentei desativar antivirus, pesquisar problemas, desativar firewall, criar um novo projeto cabal, entre outras alternativas.
+Foi quando achei em um forum falando sobre o WSL usando o Ubuntu, foi quando resolvi tentar essa alternativa e enfim consegui fazer o Scotty funcionar.
 
-foi quando achei em um forum falando sobre o WSL usando o Ubuntu, foi quando resolvi tentar essa alternativa e enfim consegui fazer o Scotty funcionar.
+
 
 ---
 
 ## 4. Testes
 
-Utilizei a biblioteca HUnit pra estruturar e realizar os testes unitários. O foco foi em, justamente, validar as funções puras isolando-as da camade web(Scotty) e de efeitos colaterais, como o RNG e o banco de dados.
+Utilizei a biblioteca HUnit pra estruturar e realizar os testes unitários. O foco foi em, justamente, validar as funções puras isolando-as da camada web(Scotty) e de efeitos colaterais, como o RNG e o banco de dados.
 
 As principais funções testadas foram as mais verbosas, incluindo: aplicarAcao, aplicarEfeito e resolverTurno. Foram simulados alguns GameStates pra simular a jogabilidade e testar os casos.
 
@@ -89,9 +86,9 @@ O Deploy foi tranquilo e nada fora do esperado, utilizei os slides da professora
 
 ## 7. Resultado final
 
-Apresente o resultado final do trabalho, na forma de GIF animado ou vídeo curto (máximo 60s)
+![Demonstracao da Gameplay](assets/gameplay.gif)
 
-Você também pode acrescentar uma breve explicação sobre o que está sendo demonstrado.
+O GIF acima demonstra o fluxo principal da aplicação em funcionamento, foca no ciclo basico de gameplay: exploração, sistema de combate em turnos (onde os cliques disparam requisições POST para a API em Haskell) e a transição para a tela de fim de jogo com a atualização do Leaderboard.
 
 ---
 
@@ -124,14 +121,14 @@ ChatGPT - GPT-5.x (OpenAI - Free): Utilizado pra esclarecimento de conceitos, re
 - **Objetivo da consulta: gerar um front-end pra aplicação web, pra melhor ilustrar o sistema e ajudar na interação 
 - **Trecho do prompt ou resumo fiel: Gere um frontend completo (HTML, CSS estilo dungeon dark e JS vanilla) que consuma rotas fetch de uma API local (POST /acao, POST /nova-partida) enviando e recebendo um JSON com o estado do jogo para atualizar a tela
 - **O que foi aproveitado: toda a estrutura e a lógica provida através de html, css e js
-- **O que foi modificado ou descartado: ajustem no codigo de css pra ficar mais como eu desejava e no javascript pra funcionar com a lógica do backend
+- **O que foi modificado ou descartado: ajustes no codigo de css pra ficar mais como eu desejava e no javascript pra funcionar com a lógica do backend
 
 #### Interação 3
 
 - **Objetivo da consulta: entender melhor sobre a keyword Maybe no haskell
 - **Trecho do prompt ou resumo fiel: "ta mas apenas assim tipo com Maybe inimigo ele ja sabe que ou é um data Inimigo ou é nothing? ou precisa criar outra coisa que retorne ou Just Inimigo ou nothing tipo data inimigopossivel = Just Inimigo | Nothing?"
-- **O que foi aproveitado: o explicação que ele deu, inclusive com a comparação com a estrutura Nullable<T> do C#
-- **O que foi modificado ou descartado: nada
+- **O que foi aproveitado: a explicação que ele deu, inclusive com a comparação com a estrutura Nullable<T> do C#
+- **O que foi modificado ou descartado: nada, a principio
 
 ---
 
@@ -156,26 +153,34 @@ com o uso da ia no projeto eu passei a compreender varios conceitos que ainda n�
 
 ## 9. Referências e créditos
 
-Liste referências e créditos de forma detalhada, com título e URL, incluindo, quando aplicável:
 
+**Haskell Web Framework (Scotty)** - Disponível em: https://hackage.haskell.org/package/scotty
+Documentação oficial.
 
-- sites consultados
-- documentações
-- materiais de aula
-- colegas
-- trechos de código adaptados
-- imagens, vídeos
+**Aeson** - Disponível em: https://hackage.haskell.org/package/aeson
+Documentação oficial.
 
-Exemplo:
+**SQLite Simple** - Disponível em: https://hackage.haskell.org/package/sqlite-simple
+Documentação oficial.
 
-- Documentação do Scotty: ...
-- Documentação do Render: ...
-- Material de aula da disciplina: ...
-- Vídeo sobre Scotty: ...
+**HUnit** - Disponível em: https://hackage.haskell.org/package/HUnit
+Documentação oficial.
 
-Slay the Spire 2. Disponível em: (https://store.steampowered.com/app/2868840/Slay_the_Spire_2/)
+**Render** - Disponível em: https://docs.render.com/docker
+Documentação oficial.
+
+**WSL (Windows Subsystem for Linux)** - Disponível em: https://learn.microsoft.com/pt-br/windows/wsl/install
+Usado pra subir o servidor da aplicação web via Scotty.
+
+**Slides e materiais da disciplina** - Disponível em: https://github.com/AndreaInfUFSM/elc117-2026a
+Material disponibilizado pela professora.
+
+**Slay the Spire 2**. - Disponível em: (https://store.steampowered.com/app/2868840/Slay_the_Spire_2/)
 Utilizado como referência de inspiração para a estrutura de progressão por turnos e modelagem do estado do jogo.
 
-Fórum Zvon - Haskell
-http://www.zvon.org/other/haskell/Outputprelude/div_f.html
+
+**Fórum Zvon - Haskell.** - Disponível em: http://www.zvon.org/other/haskell/Outputprelude/div_f.html
 Usado pra compreender funções utilizadas da biblioteca Prelude.
+
+**Pagina do Reddit da Linguagem.** - Disponível em: https://www.reddit.com/r/haskell/
+Usado para sanar duvidas pontuais
