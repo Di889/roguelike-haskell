@@ -34,6 +34,7 @@ html, body {
   font-family: var(--font);
   font-size: 20px;
   overflow-x: hidden;
+  overflow: hidden;
 }
 
 /* ================================================
@@ -56,6 +57,10 @@ html, body {
     linear-gradient(rgba(30,30,50,0.4) 1px, transparent 1px),
     linear-gradient(90deg, rgba(30,30,50,0.4) 1px, transparent 1px);
   background-size: 40px 40px;
+}
+
+#game-screen {
+  height: 100vh;
 }
 
 .start-wrap {
@@ -204,6 +209,7 @@ input[type="text"]::placeholder { color: var(--text-dim); }
   display: grid;
   grid-template-columns: 210px 1fr 210px;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
@@ -241,6 +247,10 @@ input[type="text"]::placeholder { color: var(--text-dim); }
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.5rem;
+}
+
+.defending {
+  outline: 2px solid #4488dd;
 }
 
 .stat-row {
@@ -311,13 +321,17 @@ input[type="text"]::placeholder { color: var(--text-dim); }
    LOG DE EVENTOS
    ================================================ */
 
-.log-panel { background: var(--surface); }
-
-#event-log {
+.log-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  font-size: 1.1rem;
+  overflow: hidden;
+  min-height:
+}
+
+#event-log {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 .log-entry {

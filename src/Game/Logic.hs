@@ -27,21 +27,20 @@ rotacionar (x:xs) = xs ++ [x]
 
 gerarInimigo :: Int -> Inimigo
 gerarInimigo andar = Inimigo
-  { hp         = 10 + (andar * 5)
-  , ataque     = 2  + (andar * 1)
+  { hp         = 10 + (andar * 7)
+  , ataque     = 2  + (andar * 2)
   , atkpattern = "AAB"
   }
 
 avancarTurnoInimigo :: Inimigo -> Inimigo
 avancarTurnoInimigo enemy = enemy {atkpattern = rotacionar (atkpattern enemy)}
 
+-- aq so permite um item de cada, por mais que soh tenha 2 por enqnt
 adicionarItem :: Item -> [Item] -> [Item]
-adicionarItem item lista =
-  let numItens = length lista
-      slotsItem = 3
-  in if numItens < slotsItem
-        then item : lista
-        else lista
+adicionarItem novoItem listaAtual =
+  if any (\i -> nomeItem i == nomeItem novoItem) listaAtual
+     then listaAtual
+     else novoItem : listaAtual
 
 gerarItem :: Int -> Item
 gerarItem num = case num of
@@ -106,21 +105,26 @@ aplicarAcao gs (Explorar roomNum itemRoll) =
         1 -> novoState { inimigo = Just (gerarInimigo (andaratual novoState)) }
         2 -> novoState { jogador = aplicarEfeito curaFogueira p }
         _ -> novoState { jogador = p { itens = adicionarItem (gerarItem itemRoll) (itens p) } }
-aplicarAcao gs (UsarItem item) = case efeito item of
-  FugaGarantida -> (avancarSala gs) {inimigo = Nothing}
-  _ ->
-    let p           = jogador gs
-        playerCurado = aplicarEfeito (efeito item) p
-        novosItens  = filter (\i -> nomeItem i /= nomeItem item) (itens playerCurado)
-    in gs { jogador = playerCurado { itens = novosItens } }
+aplicarAcao gs (UsarItem item) =
+  let p          = jogador gs
+      novosItens = filter (\i -> nomeItem i /= nomeItem item) (itens p)
+      pSemItem   = p { itens = novosItens }
+  in case efeito item of
+    FugaGarantida -> case inimigo gs of
+      Nothing -> gs -- verifica se esta em combate pra nao gastar atoa
+      Just _  -> (avancarSala gs) { inimigo = Nothing, jogador = pSemItem }
+
+    _ -> -- caso seja pocao
+      let playerCurado = aplicarEfeito (efeito item) pSemItem
+      in gs { jogador = playerCurado }
 
 novaPartida :: String -> GameState
 novaPartida nomeJogador =
   GameState
     { jogador = Player
         { nome   = nomeJogador
-        , health = 80
-        , maxHealth = 100
+        , health = 50
+        , maxHealth = 50
         , xp     = 10
         , itens  = []
         , defesa = 0
@@ -129,14 +133,5 @@ novaPartida nomeJogador =
     , andaratual = 1
     , salaatual  = 1
     }
-
--- RNGS, serao gerados pelo scotty:
--- itemRoll, um num de 1 a 2
--- roomNum, um num de 0 a 3
--- fugirChance, um num de 0 a 1
--- p1 = Player {nome = "fulano", health = 30, xp = 20, itens = [pocao, escapeScroll]}
--- i1 = Inimigo {hp = 50, ataque = 2, bloqueio = 3, atkpattern = "ABA"}
--- g1 = GameState {jogador = p1, inimigo = Nothing, andaratual = 1, salaatual = 1}
--- g2 = GameState {jogador = p1, inimigo = Just i1, andaratual = 1, salaatual = 1}
 
 -- atk pattern do inimigo exemplo : "AAB" cada caractere é uma ação, A = ataca, B = defende e aumenta seu dano ex:(+1 de dano de ataque)

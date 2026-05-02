@@ -179,10 +179,18 @@ function gerarLog(prev, next, acao) {
   }
 
   /* ---- DEFENDER ---- */
-  if (tag === 'DefenderC') {
-    log('🛡 Você se prepara para defender (+5 defesa).', 'defend');
-    resolverTurnoInimigo(pp, np, pi, ni);
+if (tag === 'DefenderC') {
+  log('🛡 Você se prepara para defender (+5 defesa).', 'defend');
+
+  // efeito visual
+  const hpBar = document.getElementById('hp-bar');
+  if (hpBar) {
+    hpBar.classList.add('defending');
+    setTimeout(() => hpBar.classList.remove('defending'), 300);
   }
+
+  resolverTurnoInimigo(pp, np, pi, ni);
+}
 
   /* ---- FUGIR ---- */
   if (tag === 'FugirC') {
@@ -273,8 +281,6 @@ function renderUI() {
   document.getElementById('hp-text').textContent = `${p.health}/${maxHp}`;
   document.getElementById('xp-display').textContent  = p.xp;
   document.getElementById('level-display').textContent = Math.floor(p.xp / 10);
-  document.getElementById('defense-display').textContent =
-    p.defesa > 0 ? `+${p.defesa} 🛡` : '0';
 
   /* Barra de HP */
   const hpBar = document.getElementById('hp-bar');
@@ -286,24 +292,26 @@ function renderUI() {
 
   /* Inventário */
   const itemList = document.getElementById('item-list');
-  const slots    = 3;
-  itemList.innerHTML = '';
-  // titulo do inventário com contagem
-  document.querySelector('.inv-title').textContent =
-    `ITENS (${p.itens.length}/${slots})`;
 
-  if (p.itens.length === 0) {
-    itemList.innerHTML = '<span class="muted">Inventário vazio</span>';
-  } else {
-    p.itens.forEach(item => {
-      const btn = document.createElement('button');
-      btn.className   = 'item-btn';
-      btn.textContent = `${item.nomeItem}\n${efeitoLabel(item.efeito)}`;
-      btn.title       = `Usar ${item.nomeItem}`;
-      btn.onclick     = () => acaoUsarItem(item);
-      itemList.appendChild(btn);
-    });
-  }
+  document.querySelector('.inv-title').textContent =
+    `ITENS (${p.itens.length}/2)`;
+
+  const tipos = [
+    { nome: "Pocao", label: "🧪 Poção" },
+    { nome: "escapeScroll", label: "📜 Scroll" }
+  ];
+
+  itemList.innerHTML = tipos.map(t => {
+    const item = p.itens.find(i => i.nomeItem === t.nome);
+
+  return item
+    ? `<button class="item-btn"
+         onclick='acaoUsarItem(${JSON.stringify(item)})'>
+         ${t.label}<br>
+         <span class="muted">${efeitoLabel(item.efeito)}</span>
+       </button>`
+    : `<div class="muted">[ ${t.label} vazio ]</div>`;
+  }).join('');
 
   /* Inimigo */
   const enemyDiv = document.getElementById('enemy-info');
@@ -379,7 +387,8 @@ function log(msg, type = '') {
   const el = document.createElement('div');
   el.className   = `log-entry${type ? ' ' + type : ''}`;
   el.textContent = msg;
-  container.prepend(el); // mais recente no topo
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
 }
 
 function clearLog() {

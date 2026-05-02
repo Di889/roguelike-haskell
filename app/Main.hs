@@ -53,10 +53,15 @@ main = do
 -- aplica a acao e resolve o turno do inimigo
 processarAcao :: GameState -> AcaoCliente -> IO GameState
 processarAcao gs ExplorarC = do
-  roomNum  <- randomRIO (0, 3) :: IO Int  -- 0=vazio 1=inimigo 2=fogueira 3=item
-  itemRoll <- randomRIO (1, 2) :: IO Int  -- 1=pocao 2=escapeScroll
+  roomRoll <- randomRIO (1, 10) :: IO Int
+  let roomNum
+        | roomRoll <= 5 = 1 -- 50% de ser inimigo
+        | roomRoll <= 7 = 3 -- 20% de ser item
+        | roomRoll == 8 = 2 -- 10% de ser fogueira
+        | otherwise     = 0 -- 20% de ser sala vazia
+
+  itemRoll <- randomRIO (1, 2) :: IO Int
   let estadoAposAcao = aplicarAcao gs (Explorar roomNum itemRoll)
-  -- removido o resolver turno pro inimigo nao atacar sem o player fazer sua acao
   return estadoAposAcao
 
 processarAcao gs AtacarC = do
