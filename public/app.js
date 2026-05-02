@@ -230,14 +230,9 @@ if (tag === 'DefenderC') {
   }
 }
 
-/** Loga o turno do inimigo usando o primeiro caractere do atkpattern ANTERIOR.
- *  Esse char é exatamente o que o backend executou em resolverTurno:
- *    'A' → inimigo atacou (dano pode ser 0 se bloqueado pela defesa)
- *    'B' → inimigo se fortaleceu (+1 ataque)
- *  Inferir pelo delta de HP seria errado quando a defesa absorve tudo.
- */
+
 function resolverTurnoInimigo(pp, np, pi, ni) {
-  if (!pi) return; // não havia inimigo antes, turno não ocorreu
+  if (!pi) return;
 
   const acaoInimigo = pi.atkpattern?.[0]; // 'A' ou 'B'
 
@@ -252,7 +247,6 @@ function resolverTurnoInimigo(pp, np, pi, ni) {
   } else if (acaoInimigo === 'B') {
     log('💪 O inimigo se fortaleceu! (+1 de ataque)', 'enemy-atk');
   } else {
-    // fallback: padrão desconhecido — ainda usa delta de HP
     const dano = pp.health - np.health;
     if (dano > 0) log(`💀 O inimigo causou ${dano} de dano!`, 'enemy-atk');
     else log('👁 O inimigo passou o turno.', 'system');
