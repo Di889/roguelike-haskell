@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dungeon Crawler</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- ==================== TELA INICIAL ==================== -->
+  <div id="start-screen" class="screen active">
+    <div class="start-wrap">
+      <h1 class="game-title">⚔ DUNGEON<br>CRAWLER ⚔</h1>
+      <p class="subtitle">Entre nas masmorras. Se ousar.</p>
+
+      <div class="start-form">
+        <label for="player-name">Nome do aventureiro:</label>
+        <input type="text" id="player-name" placeholder="Digite seu nome..." maxlength="20" autocomplete="off">
+        <button id="start-btn" class="btn btn-primary">▶ INICIAR AVENTURA</button>
+      </div>
+
+      <div class="lb-box">
+        <h2 class="lb-title">🏆 MELHORES AVENTUREIROS</h2>
+        <div id="start-leaderboard" class="lb-content">Carregando...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== TELA DE JOGO ==================== -->
+  <div id="game-screen" class="screen">
+
+    <header class="game-header">
+      <span class="header-brand">⚔ DUNGEON CRAWLER</span>
+      <span id="floor-info" class="header-floor">Andar 1 | Sala 1/5</span>
+    </header>
+
+    <div class="game-layout">
+
+      <!-- Painel do Jogador -->
+      <aside class="panel player-panel">
+        <h2 class="panel-title">▸ JOGADOR</h2>
+        <div id="player-name-display" class="player-name"></div>
+
+        <div class="stat-group">
+          <div class="stat-label">HP</div>
+          <div class="bar-wrap">
+            <div id="hp-bar" class="bar hp-bar" style="width:80%"></div>
+          </div>
+          <div id="hp-text" class="stat-val">80/100</div>
+        </div>
+
+        <div class="stat-row">
+          <span class="stat-label">XP</span>
+          <span id="xp-display" class="stat-val">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Nível</span>
+          <span id="level-display" class="stat-val">0</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">🛡 Defesa</span>
+          <span id="defense-display" class="stat-val">0</span>
+        </div>
+
+        <div class="inventory">
+          <div class="inv-title">ITENS (0/3)</div>
+          <div id="item-list"><span class="muted">Inventário vazio</span></div>
+        </div>
+      </aside>
+
+      <!-- Log de Eventos -->
+      <main class="panel log-panel">
+        <h2 class="panel-title">▸ DIÁRIO DE AVENTURA</h2>
+        <div id="event-log"></div>
+      </main>
+
+      <!-- Painel do Inimigo -->
+      <aside class="panel enemy-panel">
+        <h2 class="panel-title">▸ INIMIGO</h2>
+        <div id="enemy-info">
+          <p class="no-enemy">Nenhum inimigo<br>à vista...</p>
+        </div>
+      </aside>
+
+    </div><!-- /game-layout -->
+
+    <!-- Barra de Ações -->
+    <div class="actions-bar">
+      <button id="btn-explorar" class="btn btn-explore" onclick="acaoExplorar()">🗺 EXPLORAR</button>
+      <button id="btn-atacar"   class="btn btn-attack"  onclick="acaoAtacar()"   disabled>⚔ ATACAR</button>
+      <button id="btn-defender" class="btn btn-defend"  onclick="acaoDefender()" disabled>🛡 DEFENDER</button>
+      <button id="btn-fugir"    class="btn btn-flee"    onclick="acaoFugir()"    disabled>🏃 FUGIR</button>
+    </div>
+
+  </div><!-- /game-screen -->
+
+  <!-- ==================== TELA DE MORTE ==================== -->
+  <div id="death-screen" class="screen">
+    <div class="death-wrap">
+      <h1 class="death-title">💀 VOCÊ MORREU 💀</h1>
+      <div id="death-stats" class="death-stats"></div>
+
+      <div class="lb-box">
+        <h2 class="lb-title">🏆 PLACAR FINAL</h2>
+        <div id="death-leaderboard" class="lb-content">Carregando...</div>
+      </div>
+
+      <button class="btn btn-primary" onclick="voltarInicio()">↩ JOGAR NOVAMENTE</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
